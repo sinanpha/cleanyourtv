@@ -46,4 +46,20 @@ public class WallpaperCaptionsTest {
     public void missingFolderHasNoNames() {
         assertTrue(WallpaperCaptions.read(null).isEmpty());
     }
+
+    @Test
+    public void pickerLabelsPreferCaptionsThenNumberScreensaverCopies() {
+        Map<String, String> captions = WallpaperCaptions.parse(Arrays.asList("01-dusk.jpg\tDusk over the peaks"));
+        assertEquals(Arrays.asList("Dusk over the peaks", "wallpaper", "Screensaver 1", "Screensaver 2"),
+                WallpaperCaptions.labels(Arrays.asList("01-dusk.jpg", "wallpaper.jpg",
+                        "ss-41f63239fad86589.webp", "ss-427d59afd186ec15.webp"), captions, "Screensaver %1$d"));
+    }
+
+    @Test
+    public void aCaptionedScreensaverCopyStillCountsTowardsTheNumbers() {
+        // Numbers stay put when one copy gets a caption, so "Screensaver 2" is the same picture as before.
+        Map<String, String> captions = WallpaperCaptions.parse(Arrays.asList("ss-a.webp\tGolden Gate"));
+        assertEquals(Arrays.asList("Golden Gate", "Screensaver 2"),
+                WallpaperCaptions.labels(Arrays.asList("ss-a.webp", "ss-b.webp"), captions, "Screensaver %1$d"));
+    }
 }

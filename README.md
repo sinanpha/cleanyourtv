@@ -547,9 +547,12 @@ and a wallpaper.
   - **Apps per row** 4, 5, 6 or 7; **Rows below dock** 0 to 3, how many rows of tiles stay visible under the
     dock band; **Dock band opacity** 100%, 70%, 50% or 30%. The last two only do anything while the dock is
     its own row (`dock_row`, on by default).
-  - **Wallpaper**: one picture from the theme's collection (or its `wallpaper.jpg`), **None**, or **Theme
-    default**. A pick holds that picture and stops the rotation until you choose Theme default, press
+  - **Wallpaper**: **None** (at the top of the list), one picture from the theme's collection (or its
+    `wallpaper.jpg`) by its caption or file name, or **Theme default**. A pick holds that picture and stops the rotation until you choose Theme default, press
     Follow theme, or push the theme again.
+  - **Change the wallpaper every (minutes)** 5, 15, 30 or 60, which rotates the pictures in `wallpapers/`
+    and drops a single picture picked above; **Darken the wallpaper** 0%, 20%, 40% or 60%, for a bright photo
+    under white text.
   - **Animations** on or off, and **Advanced effects** (tile lift, icon zoom and smooth ambient-colour
     transitions; they may use more memory) once animations are on.
   - **Follow theme (reset on-TV choices)**, which clears every choice above. Pushing or resetting a theme

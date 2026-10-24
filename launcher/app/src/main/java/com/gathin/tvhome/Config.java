@@ -43,6 +43,8 @@ final class Config {
     static final String ROWS_BELOW_DOCK_KEY = "rows_below_dock";
     static final String WALLPAPER_CHOICE_KEY = "wallpaper_choice";
     static final String DOCK_OPACITY_KEY = "dock_opacity";
+    static final String WALLPAPER_ROTATION_KEY = "wallpaper_rotation_minutes";
+    static final String WALLPAPER_DIM_KEY = "wallpaper_dim";
     /**
      * Counts the changes made in Launcher settings. Home remembers the count it was built with and rebuilds on
      * resume when it differs, however the settings were left (see MainActivity#onResume).
@@ -484,8 +486,15 @@ final class Config {
         // A theme can also switch the wallpaper off while the file is still there.
         boolean wallpaperEnabled = json == null || bool(json, "wallpaper", true);
         if (!wallpaperEnabled) wallpaper = null;
-        int rotationMinutes = json == null ? 0 : integer(json, "wallpaper_rotation_minutes", 0, 0, 1440);
-        int wallpaperDim = json == null ? 0 : integer(json, "wallpaper_dim", 0, 0, 90);
+        // config.xml, then the theme, then the choice made in Launcher settings.
+        int rotationMinutes = Math.max(0, Math.min(1440, res.getInteger(R.integer.wallpaper_rotation_minutes)));
+        int wallpaperDim = Math.max(0, Math.min(90, res.getInteger(R.integer.wallpaper_dim)));
+        if (json != null) {
+            rotationMinutes = integer(json, "wallpaper_rotation_minutes", rotationMinutes, 0, 1440);
+            wallpaperDim = integer(json, "wallpaper_dim", wallpaperDim, 0, 90);
+        }
+        rotationMinutes = chosen(choices.getInt(WALLPAPER_ROTATION_KEY, -1), 1, 1440, rotationMinutes);
+        wallpaperDim = chosen(choices.getInt(WALLPAPER_DIM_KEY, -1), 0, 90, wallpaperDim);
         int dockOpacity = json == null ? 100 : integer(json, "dock_opacity", 100, 30, 100);
         dockOpacity = chosenDockOpacity(choices.getInt(DOCK_OPACITY_KEY, -1), dockOpacity);
         String wallpaperOrder = json == null ? WallpaperRotation.ORDER_SHUFFLE
@@ -564,18 +573,24 @@ final class Config {
             SharedPreferences.Editor editor = choices.edit();
             if (!"absent".equals(token)) editor.remove("columns").remove("animations")
                     .remove("advanced_effects").remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY)
-                    .remove(DOCK_OPACITY_KEY);
+                    .remove(DOCK_OPACITY_KEY).remove(WALLPAPER_ROTATION_KEY).remove(WALLPAPER_DIM_KEY);
             editor.putString(THEME_SIGNATURE_KEY, signature).commit();
         } else if (!seen.equals(signature)) {
             choices.edit().remove("columns").remove("animations").remove("advanced_effects")
                     .remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY).remove(DOCK_OPACITY_KEY)
+                    .remove(WALLPAPER_ROTATION_KEY).remove(WALLPAPER_DIM_KEY)
                     .putString(THEME_SIGNATURE_KEY, signature).commit();
         }
     }
 
     /** The dock band opacity chosen in Launcher settings, or the theme's when none (or an out-of-range one) is saved. */
     static int chosenDockOpacity(int chosen, int theme) {
-        return chosen >= 30 && chosen <= 100 ? chosen : theme;
+        return chosen(chosen, 30, 100, theme);
+    }
+
+    /** A number chosen in Launcher settings, or the theme's when none (or an out-of-range one) is saved. */
+    static int chosen(int chosen, int min, int max, int theme) {
+        return chosen >= min && chosen <= max ? chosen : theme;
     }
 
     private static String fileStamp(File file) {

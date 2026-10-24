@@ -254,22 +254,41 @@
                             android:includeFontPadding="false"
                             android:visibility="gone" />
 
-                        <TextClock
-                            android:id="@+id/date"
-                            android:gravity="left"
+                        <!-- The date, and after it the weather when weather_authority is set (HeaderWeather). -->
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:singleLine="@bool/date_single_line"
-                            android:maxLines="2"
-                            android:lineSpacingExtra="6dp"
-                            android:ellipsize="end"
-                            android:format12Hour="@string/date_format_home"
-                            android:format24Hour="@string/date_format_home"
-                            android:textColor="#A6FFFFFF"
-                            android:textSize="14sp"
-                            android:fontFamily="@string/font_regular"
-                            android:letterSpacing="0.14"
-                            android:textAllCaps="true" />
+                            android:orientation="horizontal">
+
+                            <TextClock
+                                android:id="@+id/date"
+                                android:gravity="left"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:singleLine="@bool/date_single_line"
+                                android:maxLines="2"
+                                android:lineSpacingExtra="6dp"
+                                android:ellipsize="end"
+                                android:format12Hour="@string/date_format_home"
+                                android:format24Hour="@string/date_format_home"
+                                android:textColor="#A6FFFFFF"
+                                android:textSize="14sp"
+                                android:fontFamily="@string/font_regular"
+                                android:letterSpacing="0.14"
+                                android:textAllCaps="true" />
+
+                            <TextView
+                                android:id="@+id/weather"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="22dp"
+                                android:singleLine="true"
+                                android:textColor="#E6FFFFFF"
+                                android:textSize="14sp"
+                                android:fontFamily="@string/font_regular"
+                                android:letterSpacing="0.08"
+                                android:visibility="gone" />
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -335,6 +354,14 @@
                     android:visibility="gone"
                     android:contentDescription="@string/app_library"
                     android:drawableStart="@drawable/ic_apps"
+                    android:nextFocusDown="@+id/grid" />
+
+                <TextView
+                    android:id="@+id/btnLauncherTop"
+                    style="@style/TopButtonIcon"
+                    android:visibility="gone"
+                    android:contentDescription="@string/launcher_settings"
+                    android:drawableStart="@drawable/ic_home_settings_pill"
                     android:nextFocusDown="@+id/grid" />
 
                 <TextView

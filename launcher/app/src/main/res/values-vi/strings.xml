@@ -71,6 +71,7 @@
     <string name="dock_edit_pick_app">Giờ chọn ứng dụng để đặt vào đó rồi nhấn OK. Nhấn Quay lại để chọn vị trí khác.</string>
     <string name="tile_add_to_dock">Thêm vào dock</string>
     <string name="tile_replace_in_dock">Thay bằng ứng dụng khác</string>
+    <string name="tile_remove_from_dock">Bỏ khỏi dock</string>
     <string name="dock_edit_pick_place">Chọn vị trí trên dock cho ứng dụng này rồi nhấn OK. Nhấn Quay lại để hủy.</string>
     <string name="festival_dussehra_greeting">Chúc mừng lễ Dussehra</string>
     <string name="festival_diwali_greeting">Chúc mừng lễ Diwali</string>
@@ -82,6 +83,9 @@
     <string name="wallpaper_none">Không có</string>
     <string name="wallpaper_applied">Đã đổi hình nền</string>
     <string name="wallpaper_theme_default">Theo theme</string>
+    <string name="wallpaper_rotation_label">Đổi hình nền sau (phút)</string>
+    <string name="wallpaper_dim_label">Làm tối hình nền</string>
+    <string name="wallpaper_screensaver_picture">Ảnh màn hình chờ %1$d</string>
     <string name="reorder">Sắp xếp ứng dụng</string>
     <string name="reorder_hint">Bấm OK để nhấc ứng dụng, phím mũi tên để di chuyển, Back để đặt xuống. Bấm Back lần nữa để xong.</string>
     <string name="reorder_not_saved">Không lưu được thứ tự mới</string>

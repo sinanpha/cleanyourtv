@@ -26,6 +26,8 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
     private final boolean lightGlass;
     /** Padding all round the tiles equal to the gap between them (config.xml dock_even_padding). */
     private final boolean evenPadding;
+    /** config.xml dock_fits_apps: the band ends at the last dock app instead of spanning the free places after it. */
+    private final boolean fitApps;
     /** The band's top and bottom the glass gradient was made for; it is remade when they move. */
     private float shaderTop = Float.NaN, shaderBottom = Float.NaN;
 
@@ -35,11 +37,13 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
      * @param opacity     the plain band's opacity in percent (dock_opacity), so a wallpaper can show through it.
      * @param lightGlass  a light frosted band like the pills, for a sky or wallpaper behind it.
      * @param evenPadding the band's padding is the gap between the tiles on all four sides (dock_even_padding).
+     * @param fitApps     the band wraps the dock apps only, leaving out the free places (dock_fits_apps).
      */
     DockDecoration(int dockSize, float density, boolean translucent, boolean names, int opacity, boolean lightGlass,
-                   boolean evenPadding) {
+                   boolean evenPadding, boolean fitApps) {
         this.dockSize = dockSize;
         this.density = density;
+        this.fitApps = fitApps;
         this.namesRoom = names ? 22 * density : 0;
         this.lightGlass = lightGlass;
         this.evenPadding = evenPadding;
@@ -84,6 +88,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
             RecyclerView.ViewHolder vh = parent.getChildViewHolder(child);
             View card = vh instanceof AppAdapter.Holder ? ((AppAdapter.Holder) vh).card : child.findViewById(R.id.card);
             if (card == null) continue;
+            if (fitApps && card.getVisibility() != View.VISIBLE) continue;   // a free dock place (fill_dock off)
             float l = child.getLeft() + card.getLeft();
             float t = child.getTop() + card.getTop() + child.getTranslationY();
             float r = l + card.getWidth();

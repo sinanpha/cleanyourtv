@@ -32,6 +32,14 @@ public class GridNavigationTest {
         assertFalse(GridNavigation.atHorizontalEdge(1, 11, 4, false, false));
     }
 
+    @Test public void wrapGoesToTheOtherEndOfTheSameRow() {
+        assertEquals(7, GridNavigation.wrapTarget(0, 15, 8, true));    // dock start -> dock end
+        assertEquals(0, GridNavigation.wrapTarget(7, 15, 8, false));   // dock end -> dock start
+        assertEquals(14, GridNavigation.wrapTarget(8, 15, 8, true));   // short last row: its last tile, not the gap
+        assertEquals(8, GridNavigation.wrapTarget(14, 15, 8, false));
+        assertEquals(5, GridNavigation.wrapTarget(0, 6, 8, true));     // a dock with fewer apps than slots
+    }
+
     @Test public void singleColumnHasBothHorizontalEdges() {
         assertTrue(GridNavigation.atHorizontalEdge(1, 3, 1, true, true));
         assertTrue(GridNavigation.atHorizontalEdge(1, 3, 1, true, false));

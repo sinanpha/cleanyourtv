@@ -29,3 +29,11 @@ the rules. Keys from before this rule are on its wanted list; a screenshot for o
 | `settings_key_panel` | <img src="quick-settings-panel.jpg" width="320" alt="settings_key_panel on a TV"> |
 | `home_idle_clock_minutes` | <img src="clock-screensaver.png" width="320" alt="home_idle_clock_minutes on a TV"> |
 | `gamepad_passthrough` | <img src="switches/gamepad_passthrough.jpg" width="320" alt="gamepad_passthrough on a TV"> |
+| `launcher_settings_icon` | <img src="switches/launcher_settings_icon.jpg" width="320" alt="launcher_settings_icon on a TV: the house button focused beside Settings"> |
+| `wrap_rows` | <img src="switches/wrap_rows.jpg" width="320" alt="wrap_rows on a TV: Left on the first dock app lands on the last"> |
+| `dock_fits_apps` | <img src="switches/dock_fits_apps.jpg" width="320" alt="dock_fits_apps on a TV: a dock of seven apps whose band ends at the last one, video rows blurred"> |
+| `home_videos_authority` | <img src="switches/home_videos_authority.jpg" width="320" alt="home_videos_authority on a TV: video rows above the dock, thumbnails blurred"> |
+| `home_videos_rows` | <img src="switches/home_videos_authority.jpg" width="320" alt="home_videos_rows on a TV: History above Recommended, thumbnails blurred"> |
+| `home_videos_per_row` | <img src="switches/home_videos_authority.jpg" width="320" alt="home_videos_per_row on a TV: six videos per row, thumbnails blurred"> |
+| `home_videos_max` | <img src="switches/home_videos_authority.jpg" width="320" alt="home_videos_max on a TV: rows of videos above the dock that scroll past the screen, thumbnails blurred"> |
+| `weather_authority` | <img src="switches/weather_authority.jpg" width="320" alt="weather_authority on a TV: a sun behind a cloud and 31° after the date in the header, video rows blurred"> |

@@ -104,6 +104,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** Tiles per row and dock slots (res/values/config.xml, columns). Set in onCreate. */
     static int COLUMNS = 4;
     private boolean rtlAppGrid;
+    private boolean wrapRows;        // wrap_rows: Left/Right at a row's end go round to its other end
     private static final long MINUTE_MS = 60_000L;
     private static final long STATS_MS = 10_000L;
     /**
@@ -139,6 +140,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private TextView heroName;
     /** The top shelf: heroName, plus the cinematic shelf's "Last opened" line and dock position dots. */
     private View hero;
+    private HomeVideos homeVideos;   // home_videos_authority; null while it is empty
+    private HeaderWeather weather;   // weather_authority; null while it is empty
     private TextView heroMeta;
     private LinearLayout heroDots;
     /** Cinematic top shelf (config.xml, cinematic_home): the focused dock app's artwork behind a larger shelf. */
@@ -344,6 +347,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (festive) updateWifiLabel();
             sky.update();
             wallpaperPlayer.update();
+            if (weather != null) weather.refresh();
             handler.postDelayed(this, MINUTE_MS);
         }
     };
@@ -457,6 +461,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
         grid = findViewById(R.id.grid);
         rtlAppGrid = getResources().getBoolean(R.bool.rtl_app_grid);
+        wrapRows = getResources().getBoolean(R.bool.wrap_rows);
         // Mirror only the app grid; the header and other locales keep their own layouts.
         grid.setLayoutManager(new GridLayoutManager(this, COLUMNS) {
             @Override
@@ -511,7 +516,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             public void onChildViewDetachedFromWindow(@NonNull View v) {
             }
         });
-        if (dockRow) grid.addItemDecoration(new DockDecoration(COLUMNS, density, cinematic, cfg.alwaysShowNames, cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding));
+        if (dockRow) grid.addItemDecoration(new DockDecoration(COLUMNS, density, cinematic, cfg.alwaysShowNames, cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding,
+                getResources().getBoolean(R.bool.dock_fits_apps)));
         if (cfg.fadeRows) TopFade.attach(grid, 48 * density);
         // Reduced motion: the tiles are simply there, with no entrance (reloadApps skips it there too).
         if (animations && !reducedMotion) {
@@ -619,6 +625,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             libraryFromTopBar = true;   // closing it goes back to this button, not to the pill after the last row
         });
         btnLibraryTop.setVisibility(cfg.libraryButton && cfg.appLibrary ? View.VISIBLE : View.GONE);
+        btnLauncherTop = findViewById(R.id.btnLauncherTop);
+        launcherIcon = getResources().getBoolean(R.bool.launcher_settings_icon) && !cfg.launcherSettingsButton && !cfg.topMenu;
+        btnLauncherTop.setVisibility(launcherIcon ? View.VISIBLE : View.GONE);
+        btnLauncherTop.setOnClickListener(v -> startActivityForResult(
+                new Intent(this, LauncherSettingsActivity.class), LAUNCHER_SETTINGS_REQUEST));
         iconOnlyButtons = cfg.iconOnlyButtons;
         topMenu = cfg.topMenu;
         wifiIconOnly = iconOnlyButtons && cfg.wifiLabelWidth <= 0;
@@ -662,23 +673,42 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
             if (keyCode == KeyEvent.KEYCODE_DPAD_UP) return true;
             if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
-                // Back to the dock tile Up came from, not wherever the focus finder lands.
-                focusTile(lastFocused % COLUMNS);
+                // Back to the dock tile Up came from, not wherever the focus finder lands; the video row first.
+                if (homeVideos != null && homeVideos.shown()) homeVideos.focusFromAbove();
+                else focusTile(lastFocused % COLUMNS);
                 return true;
             }
-            int firstButton = btnInputs.getVisibility() == View.VISIBLE ? R.id.btnInputs : firstTopButton().getId();
-            int leftButton = rtlMenuBar ? R.id.btnSettings : firstButton;
-            int rightButton = rtlMenuBar ? firstButton : R.id.btnSettings;
-            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) return v.getId() == leftButton;
-            return keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && v.getId() == rightButton;
+            if (keyCode != KeyEvent.KEYCODE_DPAD_LEFT && keyCode != KeyEvent.KEYCODE_DPAD_RIGHT) return false;
+            // The next shown button along the bar, and nothing past its ends. The focus finder alone could pick a
+            // video card below (home_videos) over the button beside, since both lie to the right.
+            ViewGroup bar = (ViewGroup) v.getParent();
+            boolean rtl = rtlMenuBar || bar.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+            int step = (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) != rtl ? 1 : -1;
+            for (int i = bar.indexOfChild(v) + step; i >= 0 && i < bar.getChildCount(); i += step) {
+                View next = bar.getChildAt(i);
+                if (next.getVisibility() == View.VISIBLE && next.isFocusable()) {
+                    next.requestFocus();
+                    break;
+                }
+            }
+            return true;
         };
         btnInputs.setOnKeyListener(pillKeys);
         btnWifi.setOnKeyListener(pillKeys);
         btnSettings.setOnKeyListener(pillKeys);
         btnReorder.setOnKeyListener(pillKeys);
         btnLibraryTop.setOnKeyListener(pillKeys);
+        btnLauncherTop.setOnKeyListener(pillKeys);
+        String videoAuthority = getString(R.string.home_videos_authority);
+        if (!videoAuthority.isEmpty()) {
+            homeVideos = new HomeVideos(this, root, hero, videoAuthority,
+                    getResources().getStringArray(R.array.home_videos_rows), getResources().getInteger(R.integer.home_videos_per_row),
+                    getResources().getInteger(R.integer.home_videos_max));
+        }
+        String weatherAuthority = getString(R.string.weather_authority).trim();
+        if (!weatherAuthority.isEmpty()) weather = new HeaderWeather(this, findViewById(R.id.weather), weatherAuthority);
         if (advancedEffects) {
-            for (View button : new View[]{btnInputs, btnWifi, btnReorder, btnLibraryTop, btnSettings}) {
+            for (View button : new View[]{btnInputs, btnWifi, btnReorder, btnLibraryTop, btnLauncherTop, btnSettings}) {
                 button.setOnFocusChangeListener((view, focused) -> view.animate()
                         .scaleX(focused ? 1.04f : 1f).scaleY(focused ? 1.04f : 1f)
                         .setDuration(reducedMotion ? Motion.REDUCED_MS : 160).start());
@@ -825,6 +855,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
         restartIdleClock();
         promptsPaused = false;
+        if (homeVideos != null) homeVideos.refresh();
+        if (weather != null) weather.refresh();
         if (grid.getAdapter() == null) grid.setAdapter(adapter);   // dropped by onTrimMemory
         switch (tileRefresh.onResume(packagesChangedSinceRebuild())) {
             case REBUILD:
@@ -856,6 +888,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (showStats) startStats();
         sky.update();
         wallpaperPlayer.start();
+        wallpaperPlayer.rescan();
         handler.postDelayed(minuteTick, MINUTE_MS);
         if (festive && diya != null) {
             diya.start();
@@ -1069,6 +1102,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         grid.getRecycledViewPool().clear();
         heroArtCache.clear();
         heroArtKey = null;
+        if (homeVideos != null) homeVideos.release();
         tileRefresh.invalidate();
     }
 
@@ -1087,6 +1121,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         super.onDestroy();
         unregisterReceiver(packageReceiver);
         wallpaperPlayer.close();
+        if (homeVideos != null) homeVideos.close();
+        if (weather != null) weather.close();
         ConnectivityManager cm = getSystemService(ConnectivityManager.class);
         TvInputManager tim = (TvInputManager) getSystemService(TV_INPUT_SERVICE);
         if (tim != null) tim.unregisterCallback(inputCallback);
@@ -1304,6 +1340,39 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             focusTile(0);
             Toast.makeText(this, R.string.dock_edit_pick_place, Toast.LENGTH_LONG).show();
         }
+    }
+
+    /**
+     * fill_dock off and a free dock place: the app goes straight in after the last dock app, with no place to
+     * choose, and the dock is saved one larger.
+     */
+    private void addToDock(String key) {
+        if (reordering) endReorder();
+        if (!beginReorder()) return;
+        int free = dockedAtStart;   // the empty slots are gone while reordering: the first free place is here
+        int from = adapter.positionOf(key);
+        if (from < 0 || free >= COLUMNS) {
+            endReorder();
+            return;
+        }
+        keepScroll(() -> adapter.move(from, free));
+        dockInSession.add(key);
+        endReorder();
+        refocusAfterLayout(free);
+    }
+
+    /**
+     * fill_dock off: the app leaves the dock and becomes the first grid app; the dock apps after it close up and the
+     * free place goes to the end, ready for another. The menu offers it only while another app stays in the dock.
+     */
+    private void removeFromDock(String key) {
+        if (reordering) endReorder();
+        int from = adapter.positionOf(key);
+        if (from < 0 || !beginReorder()) return;
+        // DockSlots.dockFirst puts the dock apps first and every other tile after them, in order: this one leads.
+        dockInSession.remove(key);
+        endReorder();
+        refocusAfterLayout(from);
     }
 
     /** Puts the app at pos into dock place slot, and the app that was there where the chosen one was; then saves. */
@@ -1548,6 +1617,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 else grid.smoothScrollBy(0, dy);
             }
             showHero(position, scroll ? r.top - dy : r.top);
+            if (homeVideos != null) homeVideos.showAbove((scroll ? r.top - dy : r.top)
+                    - (hero.getVisibility() == View.VISIBLE ? 40 * density + hero.getHeight() : 16 * density));
         } else {
             // Below the dock (or in a plain grid) the glow follows the tile without the big name; letting it
             // fade out left the grid on plain black.
@@ -1855,6 +1926,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         heroArt.animate().cancel();
         heroArt.setAlpha(0f);
         heroShown = false;
+        if (homeVideos != null) homeVideos.hide();
         if (!ambientGlow) return;
         if (!animations || reducedMotion) {
             setAmbient(color);
@@ -1873,6 +1945,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     }
 
     private void hideHero() {
+        if (homeVideos != null) homeVideos.hide();
         if (!heroShown) return;
         stopAmbientAnimation();
         hero.animate().cancel();
@@ -2103,11 +2176,19 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
             // In the dock, the last app is the row's end: the empty slots after it take no focus.
             int rowCount = position < COLUMNS ? Math.min(count, adapter.dockFilled()) : count;
-            return GridNavigation.atHorizontalEdge(position, rowCount, COLUMNS,
-                    rtlAppGrid, keyCode == KeyEvent.KEYCODE_DPAD_LEFT);
+            boolean left = keyCode == KeyEvent.KEYCODE_DPAD_LEFT;
+            boolean edge = GridNavigation.atHorizontalEdge(position, rowCount, COLUMNS, rtlAppGrid, left);
+            if (!edge || !wrapRows) return edge;
+            focusTile(GridNavigation.wrapTarget(position, rowCount, COLUMNS, left != rtlAppGrid));
+            grid.playSoundEffect(left ? SoundEffectConstants.NAVIGATION_LEFT : SoundEffectConstants.NAVIGATION_RIGHT);
+            return true;
         }
         if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
-            if (position < COLUMNS) return false;          // dock row: let focus move to the top bar
+            if (position < COLUMNS) {
+                if (homeVideos == null || !homeVideos.shown()) return false;   // dock row: let focus move to the top bar
+                homeVideos.focusFromBelow();
+                return true;
+            }
             target = position - COLUMNS;
         } else {
             int lastRowStart = ((count - 1) / COLUMNS) * COLUMNS;
@@ -2135,6 +2216,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (btnWifi.getVisibility() == View.VISIBLE) return btnWifi;
         if (btnReorder.getVisibility() == View.VISIBLE) return btnReorder;
         return findViewById(R.id.btnSettings);
+    }
+
+    /** Up from the top video row: the top bar's first button. */
+    void videosUp() {
+        (btnInputs.getVisibility() == View.VISIBLE ? btnInputs : firstTopButton()).requestFocus();
+    }
+
+    /** Down from the bottom video row: back to the dock tile Up came from. */
+    void videosDown() {
+        focusTile(lastFocused % COLUMNS);
     }
 
     @Override public void onLibraryUp() {
@@ -2467,6 +2558,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private ColorStateList wifiOnlineTint, wifiPlainTint;
     /** The app library button in the top bar (library_button). */
     private View btnLibraryTop;
+    private View btnLauncherTop;     // launcher_settings_icon
+    private boolean launcherIcon;
     /** The open library came from that button: closing it returns there instead of scrolling to the grid's end. */
     private boolean libraryFromTopBar;
 
@@ -2955,7 +3048,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         View panel = getLayoutInflater().inflate(R.layout.popup_inputs, root, false);
         LinearLayout rows = panel.findViewById(R.id.rows);
         PopupWindow popup = glassPopup(panel, (int) (200 * density));
-        if (!launcherSettingsButton) addSettingsMenuRow(rows, popup, R.string.launcher_settings, () -> startActivityForResult(
+        if (!launcherSettingsButton && !launcherIcon) addSettingsMenuRow(rows, popup, R.string.launcher_settings, () -> startActivityForResult(
                 new Intent(this, LauncherSettingsActivity.class), LAUNCHER_SETTINGS_REQUEST));
         if (moduleCards) addSettingsMenuRow(rows, popup, R.string.module_cards, this::showModuleCards);
         if (dockRow) addSettingsMenuRow(rows, popup, R.string.dock_edit, this::startDockEdit);
@@ -2985,8 +3078,18 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         PopupWindow popup = glassPopup(panel, (int) (200 * density));
         if (dockRow && position < adapter.movableCount()) {
             boolean inDock = position < COLUMNS;
-            addSettingsMenuRow(rows, popup, inDock ? R.string.tile_replace_in_dock : R.string.tile_add_to_dock,
-                    () -> startDockEditFor(key, inDock));
+            // fill_dock off: the dock holds 1 to COLUMNS apps. A grid app goes straight into a free place, and a dock
+            // app can leave; a full dock still asks which app to replace.
+            int filled = adapter.dockFilled();
+            if (!inDock && fillDockLeavesSlots && filled < COLUMNS) {
+                addSettingsMenuRow(rows, popup, R.string.tile_add_to_dock, () -> addToDock(key));
+            } else {
+                addSettingsMenuRow(rows, popup, inDock ? R.string.tile_replace_in_dock : R.string.tile_add_to_dock,
+                        () -> startDockEditFor(key, inDock));
+            }
+            if (inDock && fillDockLeavesSlots && filled > 1) {
+                addSettingsMenuRow(rows, popup, R.string.tile_remove_from_dock, () -> removeFromDock(key));
+            }
         }
         if (position < adapter.movableCount()) addSettingsMenuRow(rows, popup, R.string.tile_move, () -> {
             if (!beginReorder()) return;

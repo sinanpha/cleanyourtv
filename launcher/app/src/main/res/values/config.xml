@@ -17,24 +17,34 @@
 
     <!-- Apps pinned to the dock row at the bottom, in this order. Missing apps are skipped. -->
     <string-array name="dock_apps">
+        <item>org.smarttube.stable</item>
         <item>com.netflix.ninja</item>
-        <item>com.amazon.amazonvideo.livingroom</item>
-        <item>com.google.android.youtube.tv</item>
-        <item>in.startv.hotstar</item>
+        <item>vn.vtv.vtvgotv</item>
+        <item>com.spotify.tv.android</item>
+        <item>vng.zing.mp3</item>
+        <item>com.quang.monstertv</item>
+        <item>com.coccoc.trinhduyet_tv</item>
+        <item>com.alphainventor.filemanager</item>
     </string-array>
     <!-- With fewer dock_apps than columns (or a dock app that is not installed), the free dock slots take
          the first grid apps, so the dock never shows a gap. false leaves them empty (#162); a theme can
-         set "fill_dock": false. -->
-    <bool name="fill_dock">true</bool>
+         set "fill_dock": false. Off, the dock holds 1 to `columns` apps, and with tile_menu a tile's menu
+         adds a grid app straight into a free place or removes a dock app. This TV turns it off. -->
+    <bool name="fill_dock">false</bool>
+    <!-- With fill_dock off and free dock places, the dock's band ends at the last dock app instead of running on
+         across the free places, so a dock of fewer apps looks like one. false (the default for every other TV) keeps
+         the band the full row wide. This TV sets it. -->
+    <bool name="dock_fits_apps">true</bool>
 
     <!-- Apps never shown as tiles (e.g. the Live TV app, which the Inputs menu already covers). -->
     <string-array name="hidden_apps">
         <item>com.mediatek.wwtv.tvcenter</item>
+        <item>com.mitv.livetv</item>
         <item>com.mitv.gallery</item>
     </string-array>
 
     <!-- The TV's Live TV / tuner app, offered at the end of the Inputs menu. Leave empty to omit. -->
-    <string name="live_tv_package" translatable="false">com.mediatek.wwtv.tvcenter</string>
+    <string name="live_tv_package" translatable="false">com.mitv.livetv</string>
 
     <!-- Open the Live TV app above the first time Home comes up after the TV is switched on, for sets that are
          mostly used for broadcast TV. Once per boot: Home after that stays Home. Can also be set with
@@ -174,7 +184,31 @@
          still opens on a tap; "hold:scan:490:..." works for scancodes. A key with only a hold entry does nothing
          on a tap. A listed app that is not installed leaves the button doing nothing. Leave empty to omit. -->
     <string-array name="app_keys" translatable="false">
+        <item>190:org.smarttube.stable</item>
     </string-array>
+
+    <!-- A row of videos above the dock, read from another app's content provider: the Video Shelf module app serves
+         SmartTube's home screen rows as io.github.fyting.videoshelf.shelf. Home only reads the provider; the app
+         behind it downloads the pictures, so this needs no network permission here. Empty leaves the row out
+         and is the default for every other TV; this one sets it. Up from the dock enters the row, Up again the top bar; Down goes back the same way. -->
+    <string name="home_videos_authority" translatable="false">io.github.fyting.videoshelf.shelf</string>
+    <!-- Which of the provider's rows, top to bottom, by their names as the provider gives them (SmartTube names
+         them in its own language: "Lịch sử" is History and "Đề xuất" Recommended in Vietnamese). Empty: the first row. -->
+    <string-array name="home_videos_rows" translatable="false">
+        <item>Lịch sử</item>
+        <item>Đề xuất</item>
+    </string-array>
+    <!-- Videos per row on screen at once; the cards are sized so that many fit across the screen. -->
+    <integer name="home_videos_per_row">6</integer>
+    <!-- How many videos a row holds in all, as many as the provider gives up to this: the row scrolls sideways past
+         the screen and Left and Right go round at its ends. 0 (the default for every other TV) holds only
+         home_videos_per_row. This TV keeps 18, three screens of six. -->
+    <integer name="home_videos_max">18</integer>
+    <!-- The weather after the date in the header (an icon and the temperature), read from another app's content
+         provider: a Video Shelf build serves Open-Meteo's current weather for the place in its options.xml as
+         io.github.fyting.videoshelf.shelf. Home only reads it, so this needs no network permission here. Empty (the
+         default for every other TV) leaves it out. This TV sets it; the Video Shelf build is set to Hanoi. -->
+    <string name="weather_authority" translatable="false">io.github.fyting.videoshelf.shelf</string>
 
     <!-- Package of the stock launcher, for TVs whose firmware turns it back on after it was disabled. XGIMI's
          com.xgimi.xrmservice does, on every one of its remote keys, power included (docs/TROUBLESHOOTING.md).
@@ -202,6 +236,10 @@
     <!-- A direct Launcher settings action instead of TV Settings in the header (or top_menu).
          Off by default; a theme can set "launcher_settings_button": true. -->
     <bool name="launcher_settings_button">false</bool>
+    <!-- A round Launcher settings button (a house) beside TV Settings, for owners who change the launcher often;
+         the Settings button's hold-OK menu then leaves out its own Launcher settings row. false (the default for
+         every other TV) keeps launcher settings in that menu only. This TV sets it. -->
+    <bool name="launcher_settings_icon">true</bool>
     <!-- The dock band as light frosted glass, like the Inputs, Wi-Fi and Settings pills, so a sky or wallpaper shows
          through it. false (the default) keeps the solid near-black band, or the cinematic shelf's dark glass. Can
          also be set with "dock_glass": true in a theme's config.json. -->
@@ -215,9 +253,9 @@
     <bool name="reorder_button">false</bool>
     <!-- Wi-Fi and Settings as round icon-only buttons (the network name moves to the talkback description);
          Inputs keeps its label. -->
-    <bool name="icon_only_buttons">false</bool>
+    <bool name="icon_only_buttons">true</bool>
     <!-- The Inputs pill as a round icon button too (the label moves to the talkback description). -->
-    <bool name="icon_only_inputs">false</bool>
+    <bool name="icon_only_inputs">true</bool>
     <!-- true colours the Wi-Fi pill's icon green while the TV is online and leaves it white while it is not (dark on
          the focused pill either way), so the connection shows at a glance, also as an icon-only button. Can also be
          set with "wifi_status_color": true in a theme's config.json. -->
@@ -240,6 +278,14 @@
     <!-- Wallpapers decode as RGB_565 (2 bytes a pixel, 4 MB at 1080p), which bands dark gradients such as a night
          sky, most of all under wallpaper_dim. true decodes them in 32-bit colour: 8 MB, for TVs with 2 GB or more. -->
     <bool name="wallpaper_true_color">false</bool>
+    <!-- Rotate the pictures in wallpapers/ (in the launcher's files folder on the TV) every this many minutes; 0 (the
+         default for every other TV) shows only a single wallpaper.jpg. A theme's "wallpaper_rotation_minutes" wins
+         over it, and Launcher settings on the TV over both (5, 15, 30 or 60). This TV rotates the pictures its
+         screensaver cached, copied in over ADB. -->
+    <integer name="wallpaper_rotation_minutes">15</integer>
+    <!-- Black over the wallpaper, in percent (0 to 90), so the white text stays readable on a bright photo; 0 is the
+         default for every other TV. A theme's "wallpaper_dim" wins over it, and Launcher settings over both. -->
+    <integer name="wallpaper_dim">40</integer>
     <!-- Rotating wallpapers: show each picture's name under the top-right buttons, from a captions.txt next to the
          pictures in wallpapers/ ("01-dusk.jpg<TAB>Dusk over the peaks", one per line). A picture without a line
          shows no name. Can also be set with "wallpaper_captions": true in a theme's config.json. -->
@@ -254,7 +300,7 @@
     <!-- Hold OK on a tile opens a small menu: Move (picks the tile up for reordering), Remove from Home (only with
          app_library) and App info. false keeps the old behaviour: holding OK opens the app's App info page.
          Can also be set with "tile_menu": true in a theme's config.json. -->
-    <bool name="tile_menu">false</bool>
+    <bool name="tile_menu">true</bool>
 
     <!-- Grid rows left visible under the dock on the home screen. 0 = dock sits at the very bottom. Tiles shrink if
          the dock, its title and this many rows would not otherwise fit the screen height. -->
@@ -262,11 +308,16 @@
 
     <!-- The focused dock app's name in large type above the dock. false keeps only the glow, which leaves room
          for bigger tiles when rows_below_dock is 2 or 3. -->
-    <bool name="dock_title">true</bool>
+    <bool name="dock_title">false</bool>
+
+    <!-- Left and Right at the end of the dock or of a grid row go round to that row's other end instead of
+         stopping there. false (the default for every other TV) keeps the stop; this TV sets it. Up and Down are
+         unchanged. -->
+    <bool name="wrap_rows">true</bool>
 
     <!-- Tiles per row in the grid; the dock always has this many slots. Tiles are 180dp wide at 4 columns and
          shrink to fit from 5 up (about 144dp at 5, 117dp at 6 on a 1080p TV). -->
-    <integer name="columns">4</integer>
+    <integer name="columns">8</integer>
 
     <!-- Basic motion is on; advanced effects are opt-in in the launcher's own Settings screen. -->
     <bool name="animations">true</bool>
@@ -343,8 +394,8 @@
 
     <!-- The glow behind the dock in the focused app's colour (red for YouTube, blue for Prime Video). false keeps
          only background_color or the wallpaper behind everything. Can also be set with "ambient_glow": false in a
-         theme's config.json. -->
-    <bool name="ambient_glow">true</bool>
+         theme's config.json. This TV turns it off, so the screensaver's photos behind Home keep their own colours. -->
+    <bool name="ambient_glow">false</bool>
     <!-- The focus highlight glows in the focused app's colour on every tile, as the cinematic shelf does for the
          dock, without cinematic_home. Can also be set with "app_glow": true in a theme's config.json. -->
     <bool name="app_glow">false</bool>

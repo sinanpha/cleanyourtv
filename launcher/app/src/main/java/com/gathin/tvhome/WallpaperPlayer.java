@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -60,6 +61,11 @@ final class WallpaperPlayer {
     private final String latitude, longitude;
     private LocalDate sunDay;
     private int[] sun;
+    /** The collection's folder, listed again on return to Home; null while one picture is picked or moods group it. */
+    private final File folder;
+    private String listedKey;
+    private long listedAt;
+    private boolean listing;
 
     WallpaperPlayer(Context context, FrameLayout root, Config config) {
         this.root = root;
@@ -89,6 +95,15 @@ final class WallpaperPlayer {
         names = config.wallpaperCaptions && config.wallpaperEnabled && !files.isEmpty()
                 ? WallpaperCaptions.read(files.get(0).getParentFile()) : Collections.emptyMap();
         caption = names.isEmpty() ? null : makeCaption(context, root);
+        // Pictures copied into wallpapers/ while Home runs (tools copy the screensaver's over ADB) join the rotation
+        // without a restart. A picture picked in Launcher settings stays alone, and moods name their own pictures.
+        File dir = Config.dir(context);
+        boolean picked = context.getSharedPreferences(Config.SETTINGS_NAME, Context.MODE_PRIVATE)
+                .contains(Config.WALLPAPER_CHOICE_KEY);
+        folder = interval > 0 && config.wallpaperEnabled && moods.isEmpty() && !picked && dir != null
+                ? new File(dir, "wallpapers") : null;
+        listedKey = collectionKey(files);
+        listedAt = SystemClock.elapsedRealtime();
         if (config.wallpaperEnabled && !files.isEmpty()) {
             root.addView(image, 0, new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -152,6 +167,34 @@ final class WallpaperPlayer {
         decoder.shutdownNow();
     }
 
+    /**
+     * Lists the collection's folder again on the decoder thread, at most once a minute when Home comes back, and
+     * rotates through what is there now: pictures copied in over ADB show up without restarting Home.
+     */
+    void rescan() {
+        long now = SystemClock.elapsedRealtime();
+        if (folder == null || closed || listing || now - listedAt < 60_000) return;
+        listedAt = now;
+        listing = true;
+        decoder.execute(() -> {
+            List<File> latest = WallpaperRotation.images(folder);
+            String key = collectionKey(latest);
+            root.post(() -> {
+                listing = false;
+                if (closed || key.equals(listedKey)) return;
+                listedKey = key;
+                if (latest.isEmpty()) return;   // emptied: keep the picture on screen rather than go plain
+                files.clear();
+                files.addAll(latest);
+                if (image.getParent() == null && !files.isEmpty()) {
+                    root.addView(image, 0, new FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                }
+                update();
+            });
+        });
+    }
+
     void update() {
         if (!active || closed || loading || files.isEmpty()) return;
         String previous = preferences.getString("image", "");
@@ -180,6 +223,8 @@ final class WallpaperPlayer {
                     return;
                 }
                 show(bitmap);
+                // The first picture of a collection that was empty when Home started: the plain colour is overdraw now.
+                if (displayed.isEmpty()) root.setBackground(null);
                 displayed = next.getName();
                 showCaption(true);
                 if (!displayed.equals(previous) || changed == 0) {
