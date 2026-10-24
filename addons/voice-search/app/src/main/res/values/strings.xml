@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Voice Search</string>
+    <string name="smarttube_label">SmartTube voice</string>
+    <string name="youtube_label">YouTube voice</string>
+    <string name="prompt_smarttube">Say what to find in SmartTube</string>
+    <string name="prompt_youtube">Say what to find in YouTube</string>
+    <string name="no_voice_input">This TV has no voice input to listen with</string>
+    <string name="app_missing">The app to search in is not installed</string>
+    <string name="no_mic">The TV listens only when this app may use the microphone</string>
+    <string name="retry">Didn\'t catch that. Press OK to try again</string>
+    <string name="no_network">Can\'t reach the voice service. Press OK to try again</string>
+
+    <string name="main_hint">Press a bound remote button anywhere, then just speak</string>
+    <string name="remote_buttons">Remote buttons</string>
+    <string name="service_on">The remote button service is on</string>
+    <string name="service_off">The remote button service is off: switch on \"Voice Search buttons\" in the TV\'s accessibility settings</string>
+    <string name="enable_service">Open accessibility settings</string>
+    <string name="no_accessibility_settings">This TV has no accessibility settings screen; switch the service on from a shell (README)</string>
+    <string name="no_buttons">No button yet</string>
+    <string name="binding_row">%1$s → %2$s</string>
+    <string name="remove_button">Remove this button</string>
+    <string name="add_button">+ Bind a button</string>
+    <string name="add_note">Arrows, OK, Back, Home, power and volume cannot be bound. A button another app already takes (the launcher\'s app_keys) still does that too: unbind it there.</string>
+    <string name="press_title">Press the remote button</string>
+    <string name="press_message">Press the button that should open a voice search. Back cancels.</string>
+    <string name="choose_target">%1$s opens…</string>
+    <string name="key_service_label">Voice Search buttons</string>
+    <string name="key_service_description">Opens a voice search for SmartTube or YouTube when you press a remote button you chose in Voice Search. It reads key presses only, never the screen.</string>
+</resources>

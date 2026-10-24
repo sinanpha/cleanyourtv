@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The tile: a white microphone on a red disc, and beside it a remote with one lit button. Drawn for this add-on,
+     no third-party art. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp" android:height="180dp"
+    android:viewportWidth="320" android:viewportHeight="180">
+    <path android:fillColor="#FF141414" android:pathData="M0,0h320v180h-320z" />
+    <path android:fillColor="#FFE0483E" android:pathData="M130,30a60,60 0,1 1,0 120a60,60 0,1 1,0 -120z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M116,66a14,14 0,0 1,28 0v22a14,14 0,0 1,-28 0z" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="6" android:strokeLineCap="round"
+        android:pathData="M104,86a26,26 0,0 0,52 0M130,112v12M118,126h24" />
+    <path android:fillColor="#FF3A3A3A" android:pathData="M218,44h28a10,10 0,0 1,10 10v80a10,10 0,0 1,-10 10h-28a10,10 0,0 1,-10 -10v-80a10,10 0,0 1,10 -10z" />
+    <path android:fillColor="#FFE0483E" android:pathData="M232,58a8,8 0,1 1,0 16a8,8 0,1 1,0 -16z" />
+    <path android:fillColor="#FF6A6A6A" android:pathData="M222,88h20v6h-20zM222,102h20v6h-20zM222,116h20v6h-20z" />
+</vector>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Apps whose home screen channels are shown, in the order their rows were published. Empty shows every
+         app's channels that the TV provider lets this app read. Add a package to <queries> in the manifest too. -->
+    <string-array name="source_packages" translatable="false">
+        <item>org.smarttube.stable</item>
+        <item>org.smarttube.beta</item>
+    </string-array>
+    <!-- Apps allowed to read the rows and pictures through ShelfProvider (the rows include the watch history):
+         the Clean Your TV launcher, which shows them above its dock with home_videos_authority set. -->
+    <string-array name="shelf_readers" translatable="false">
+        <item>com.gathin.tvhome</item>
+    </string-array>
+    <!-- Videos per row; a few dozen thumbnails is all a 1 GB TV should hold for one screen. 24 made the first
+         second after opening stutter on a MiTV-MOOR2 while the cards were built; 12 halves that work. -->
+    <integer name="row_limit">12</integer>
+    <!-- Cards across the screen at once; a row with more scrolls sideways. The cards are sized to fit. -->
+    <integer name="cards_per_screen">6</integer>
+    <!-- The rows shown first on this screen, in this order, by the names the source app gives them (SmartTube names
+         them in the TV's language: Lịch sử is History, Kênh đăng ký Subscriptions, Đề xuất Recommended). Other rows
+         follow in the order they were published. Empty keeps that order for all. -->
+    <string-array name="row_order" translatable="false">
+        <item>Lịch sử</item>
+        <item>History</item>
+        <item>Kênh đăng ký</item>
+        <item>Subscriptions</item>
+        <item>Đề xuất</item>
+        <item>Recommended</item>
+    </string-array>
+    <!-- Videos per row handed to the launcher's rows (ShelfProvider), which scroll sideways and cap them again with
+         home_videos_max. Only the cards Home builds are drawn, so this can be larger than row_limit. -->
+    <integer name="home_row_limit">24</integer>
+    <!-- The place whose weather ShelfProvider serves to the launcher's header (content://…shelf/weather, read with
+         weather_authority), in decimal degrees: Hanoi. Sent to Open-Meteo at two decimals (about 1 km); empty serves
+         no weather and sends nothing. -->
+    <string name="weather_latitude" translatable="false">21.03</string>
+    <string name="weather_longitude" translatable="false">105.85</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The white microphone inside the listening orb; the banners' shape at orb size. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="34dp" android:height="34dp"
+    android:viewportWidth="34" android:viewportHeight="34">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M12.5,7.5a4.5,4.5 0,0 1,9 0v8a4.5,4.5 0,0 1,-9 0z" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.2" android:strokeLineCap="round"
+        android:pathData="M9,15a8,8 0,0 0,16 0M17,23.5v4M13,28.5h8" />
+</vector>

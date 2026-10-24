@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The app icon: the SmartTube tile's microphone on its own. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#FFE0483E" android:pathData="M0,0h108v108h-108z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M45,30a9,9 0,0 1,18 0v16a9,9 0,0 1,-18 0z" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="4" android:strokeLineCap="round"
+        android:pathData="M38,45a16,16 0,0 0,32 0M54,62v9M46,73h16" />
+</vector>

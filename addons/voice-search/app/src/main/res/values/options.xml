@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The language to listen in, as a tag such as vi-VN or en-US. Empty (the default) listens in the TV's own
+         language, as the voice input does on its own. -->
+    <string name="language" translatable="false"></string>
+</resources>

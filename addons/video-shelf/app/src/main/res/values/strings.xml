@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Video Shelf</string>
+    <string name="hint">OK plays · Back closes</string>
+    <string name="loading">Loading…</string>
+    <string name="continue_watching">Continue watching</string>
+    <string name="need_access">Video Shelf needs permission to read the TV\'s home screen channels.</string>
+    <string name="grant">Allow</string>
+    <string name="nothing">No channels from SmartTube yet. Turn on its home screen channels in SmartTube\'s settings, play something, then come back.</string>
+    <string name="cannot_open">Could not open this video</string>
+</resources>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <!-- Most TVs listen through the remote's microphone, not one of their own. -->
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+
+    <!-- The TV's speech recognition service (Google's on Google TV) does the listening and hands back the words, but
+         it listens only for an app that holds the microphone permission ("call for recognition service without
+         RECORD_AUDIO permissions" otherwise): asked for on the first press, or granted with pm grant. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Package visibility (Android 11+): that recognition service, and the apps a search goes to. -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <package android:name="org.smarttube.stable" />
+        <package android:name="org.smarttube.beta" />
+        <package android:name="com.google.android.youtube.tv" />
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:icon="@drawable/icon"
+        android:label="@string/app_name"
+        android:supportsRtl="true">
+
+        <!-- The one tile: speak from here, and give remote buttons a voice search. -->
+        <activity
+            android:name=".MainActivity"
+            android:banner="@drawable/banner"
+            android:exported="true"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- The listening bars, opened by a bound remote button (KeyService), the tile's two buttons, or a shell
+             (am start ... with a query extra). Their own task, so a button pressed over another app never brings the
+             tile's screen along; one bar at a time. -->
+        <activity
+            android:name=".SmartTubeSearch"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:label="@string/smarttube_label"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:theme="@style/SeeThrough" />
+
+        <activity
+            android:name=".YouTubeSearch"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:label="@string/youtube_label"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:theme="@style/SeeThrough" />
+
+        <!-- Remote buttons that open a listening bar from anywhere. Keys only; off until switched on in the TV's
+             accessibility settings or from a shell (README). -->
+        <service
+            android:name=".KeyService"
+            android:exported="false"
+            android:label="@string/key_service_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/key_service" />
+        </service>
+    </application>
+</manifest>

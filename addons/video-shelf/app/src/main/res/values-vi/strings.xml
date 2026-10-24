@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hint">OK để phát · Back để đóng</string>
+    <string name="loading">Đang tải…</string>
+    <string name="continue_watching">Tiếp tục xem</string>
+    <string name="need_access">Video Shelf cần quyền đọc các kênh trên màn hình chính của tivi.</string>
+    <string name="grant">Cho phép</string>
+    <string name="nothing">Chưa có kênh nào từ SmartTube. Bật kênh màn hình chính trong cài đặt của SmartTube, xem thử một video rồi quay lại.</string>
+    <string name="cannot_open">Không mở được video này</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The TV banner: a shelf of three video tiles, the middle one with a play mark. Drawn for this add-on, no third-party art. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp" android:height="180dp"
+    android:viewportWidth="320" android:viewportHeight="180">
+    <path android:fillColor="#FF141414" android:pathData="M0,0h320v180h-320z" />
+    <path android:fillColor="#FF2C2C2C" android:pathData="M24,62h72a8,8 0,0 1,8 8v40a8,8 0,0 1,-8 8h-72a8,8 0,0 1,-8 -8v-40a8,8 0,0 1,8 -8z" />
+    <path android:fillColor="#FF2C2C2C" android:pathData="M232,62h72a8,8 0,0 1,8 8v40a8,8 0,0 1,-8 8h-72a8,8 0,0 1,-8 -8v-40a8,8 0,0 1,8 -8z" />
+    <path android:fillColor="#FFE0483E" android:pathData="M120,48h80a10,10 0,0 1,10 10v64a10,10 0,0 1,-10 10h-80a10,10 0,0 1,-10 -10v-64a10,10 0,0 1,10 -10z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M148,70l32,20l-32,20z" />
+    <path android:fillColor="#FF3A3A3A" android:pathData="M16,146h288v6h-288z" />
+</vector>

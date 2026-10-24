@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Tìm bằng giọng nói</string>
+    <string name="smarttube_label">Nói tìm SmartTube</string>
+    <string name="youtube_label">Nói tìm YouTube</string>
+    <string name="prompt_smarttube">Nói video muốn tìm trên SmartTube</string>
+    <string name="prompt_youtube">Nói video muốn tìm trên YouTube</string>
+    <string name="no_voice_input">TV này không có tính năng nhập bằng giọng nói</string>
+    <string name="app_missing">Chưa cài ứng dụng để tìm</string>
+    <string name="no_mic">TV chỉ nghe khi ứng dụng này được dùng micro</string>
+    <string name="retry">Không nghe rõ. Bấm OK để nói lại</string>
+    <string name="no_network">Không kết nối được dịch vụ giọng nói. Bấm OK để thử lại</string>
+
+    <string name="main_hint">Ở bất cứ đâu, bấm nút đã gán trên remote rồi nói luôn</string>
+    <string name="remote_buttons">Nút trên remote</string>
+    <string name="service_on">Dịch vụ nút remote đang bật</string>
+    <string name="service_off">Dịch vụ nút remote đang tắt: bật \"Nút tìm bằng giọng nói\" trong phần Hỗ trợ tiếp cận của TV</string>
+    <string name="enable_service">Mở cài đặt Hỗ trợ tiếp cận</string>
+    <string name="no_accessibility_settings">TV này không có màn hình Hỗ trợ tiếp cận; bật dịch vụ bằng lệnh (xem README)</string>
+    <string name="no_buttons">Chưa gán nút nào</string>
+    <string name="binding_row">%1$s → %2$s</string>
+    <string name="remove_button">Bỏ gán nút này</string>
+    <string name="add_button">+ Gán nút mới</string>
+    <string name="add_note">Không gán được các nút mũi tên, OK, Back, Home, nguồn và âm lượng. Nút đang được app khác dùng (app_keys của launcher) vẫn làm việc cũ: hãy bỏ gán ở đó.</string>
+    <string name="press_title">Bấm nút trên remote</string>
+    <string name="press_message">Bấm nút muốn dùng để mở tìm kiếm giọng nói. Back để huỷ.</string>
+    <string name="choose_target">%1$s sẽ mở…</string>
+    <string name="key_service_label">Nút tìm bằng giọng nói</string>
+    <string name="key_service_description">Mở tìm kiếm giọng nói cho SmartTube hoặc YouTube khi bạn bấm nút remote đã chọn trong Tìm bằng giọng nói. Chỉ đọc phím bấm, không đọc màn hình.</string>
+</resources>
