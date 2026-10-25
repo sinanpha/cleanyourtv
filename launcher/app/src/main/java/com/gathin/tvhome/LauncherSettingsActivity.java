@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
@@ -13,7 +15,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /** Remote-friendly settings owned by the launcher; system settings stay one row away. */
 public final class LauncherSettingsActivity extends Activity {
@@ -28,6 +35,11 @@ public final class LauncherSettingsActivity extends Activity {
     private static final int[] WALLPAPER_DIMS = {0, 20, 40, 60};
     private final TextView[] dimChoices = new TextView[WALLPAPER_DIMS.length];
     private TextView wallpaperChoice;
+    /** The video rows listed here in screen order, and those switched on. */
+    private final List<String> videoRowNames = new ArrayList<>();
+    private final Set<String> videoRowsOn = new HashSet<>();
+    private LinearLayout videoRowsBox;
+    private boolean videoFirstRowDefault;
     private TextView animationsChoice;
     private TextView advancedChoice;
     private TextView followThemeChoice;
@@ -160,7 +172,8 @@ public final class LauncherSettingsActivity extends Activity {
             choices.edit().remove("columns").remove(Config.ROWS_BELOW_DOCK_KEY).remove("animations")
                     .remove("advanced_effects").remove(Config.WALLPAPER_CHOICE_KEY)
                     .remove(Config.DOCK_OPACITY_KEY).remove(Config.WALLPAPER_ROTATION_KEY)
-                    .remove(Config.WALLPAPER_DIM_KEY).commit();
+                    .remove(Config.WALLPAPER_DIM_KEY).remove(Config.HOME_VIDEOS_ROWS_KEY).commit();
+            loadVideoRows();
             Config current = Config.load(this);
             columns = current.columns;
             rowsBelowDock = current.rowsBelowDock;
@@ -178,9 +191,81 @@ public final class LauncherSettingsActivity extends Activity {
         });
         findViewById(R.id.tvSettingsChoice).setOnClickListener(v ->
                 open(SystemSettings.intent(this, Settings.ACTION_SETTINGS)));
+        videoRowsBox = findViewById(R.id.homeVideosRows);
+        String videoAuthority = getString(R.string.home_videos_authority).trim();
+        if (videoAuthority.isEmpty()) {
+            for (int id : new int[]{R.id.homeVideosLabel, R.id.homeVideosRows, R.id.homeVideosHint}) {
+                findViewById(id).setVisibility(View.GONE);
+            }
+        } else {
+            loadVideoRows();
+            showVideoRows(Collections.emptyList());
+            readVideoRowNames(videoAuthority);
+        }
         refresh();
         if (config.launcherSettingsButton) reorderChoice.requestFocus();
         else columnChoices[Math.max(0, Math.min(columns - 4, 3))].requestFocus();
+    }
+
+    /** The rows in force (config.xml, or switched here before) are the ones switched on. */
+    private void loadVideoRows() {
+        videoRowsOn.clear();
+        List<String> rows = Config.homeVideosRows(this);
+        if (rows != null) videoRowsOn.addAll(rows);
+        // An empty home_videos_rows shows the provider's first row: it reads as switched on once the rows are known.
+        videoFirstRowDefault = rows != null && rows.isEmpty();
+    }
+
+    /** One choice per row ({@link Config#videoRowChoices}); the focus stays on the same place if it was on one. */
+    private void showVideoRows(List<String> offered) {
+        if (videoFirstRowDefault && !offered.isEmpty()) {
+            videoRowsOn.add(offered.get(0));
+            videoFirstRowDefault = false;
+        }
+        int focused = videoRowsBox.indexOfChild(videoRowsBox.getFocusedChild());
+        videoRowNames.clear();
+        videoRowNames.addAll(Config.videoRowChoices(offered,
+                Arrays.asList(getResources().getStringArray(R.array.home_videos_rows)), videoRowsOn));
+        videoRowsBox.removeAllViews();
+        for (String name : videoRowNames) {
+            TextView cell = (TextView) getLayoutInflater().inflate(R.layout.settings_choice_cell, videoRowsBox, false);
+            cell.setText(name);
+            cell.setOnClickListener(v -> {
+                if (!videoRowsOn.remove(name)) videoRowsOn.add(name);
+                choices.edit().putString(Config.HOME_VIDEOS_ROWS_KEY,
+                        Config.videoRowsChoice(videoRowNames, videoRowsOn)).apply();
+                changed();
+                refresh();
+            });
+            videoRowsBox.addView(cell);
+        }
+        if (focused >= 0 && videoRowsBox.getChildCount() > 0) {
+            videoRowsBox.getChildAt(Math.min(focused, videoRowsBox.getChildCount() - 1)).requestFocus();
+        }
+        if (videoRowsBox.getChildCount() > 0) refresh();
+    }
+
+    /**
+     * Asks the provider which rows it has now ({@code content://<authority>/rows}, Video Shelf 1.5 and later) off the
+     * main thread, so a row SmartTube adds can be switched on too. Without an answer the configured rows stay listed.
+     */
+    private void readVideoRowNames(String authority) {
+        Uri uri = Uri.parse("content://" + authority + "/rows");
+        new Thread(() -> {
+            List<String> offered = new ArrayList<>();
+            try (Cursor c = getContentResolver().query(uri, null, null, null, null)) {
+                int column = c == null ? -1 : c.getColumnIndex("row_name");
+                while (column >= 0 && c.moveToNext()) {
+                    String name = c.getString(column);
+                    if (name != null && !name.trim().isEmpty() && !offered.contains(name.trim())) offered.add(name.trim());
+                }
+            } catch (RuntimeException e) {
+                // The app behind the provider is missing, stopped answering or refused us: keep the configured rows.
+            }
+            if (!offered.isEmpty()) runOnUiThread(() -> {
+                if (!isDestroyed()) showVideoRows(offered);
+            });
+        }, "video-rows").start();
     }
 
     private void reverseRow(TextView[] views) {
@@ -292,6 +377,9 @@ public final class LauncherSettingsActivity extends Activity {
         for (int i = 0; i < dimChoices.length; i++) {
             dimChoices[i].setSelected(wallpaperDim == WALLPAPER_DIMS[i]);
         }
+        for (int i = 0; i < videoRowsBox.getChildCount() && i < videoRowNames.size(); i++) {
+            videoRowsBox.getChildAt(i).setSelected(videoRowsOn.contains(videoRowNames.get(i)));
+        }
         animationsChoice.setText(getString(R.string.animations_state,
                 getString(animations ? R.string.on : R.string.off)));
         advancedChoice.setText(getString(R.string.advanced_effects_state,
@@ -310,7 +398,8 @@ public final class LauncherSettingsActivity extends Activity {
         return choices.contains("columns") || choices.contains(Config.ROWS_BELOW_DOCK_KEY)
                 || choices.contains("animations") || choices.contains("advanced_effects")
                 || choices.contains(Config.WALLPAPER_CHOICE_KEY) || choices.contains(Config.DOCK_OPACITY_KEY)
-                || choices.contains(Config.WALLPAPER_ROTATION_KEY) || choices.contains(Config.WALLPAPER_DIM_KEY);
+                || choices.contains(Config.WALLPAPER_ROTATION_KEY) || choices.contains(Config.WALLPAPER_DIM_KEY)
+                || choices.contains(Config.HOME_VIDEOS_ROWS_KEY);
     }
 
     private void open(Intent intent) {

@@ -36,11 +36,14 @@
          the band the full row wide. This TV sets it. -->
     <bool name="dock_fits_apps">true</bool>
 
-    <!-- Apps never shown as tiles (e.g. the Live TV app, which the Inputs menu already covers). -->
+    <!-- Apps never shown as tiles (e.g. the Live TV app, which the Inputs menu already covers). A hidden app gets no
+         module card either. Video Shelf only feeds the video rows (home_videos_authority) and the weather here, so its
+         tile and card stay out of the way while its provider keeps serving. -->
     <string-array name="hidden_apps">
         <item>com.mediatek.wwtv.tvcenter</item>
         <item>com.mitv.livetv</item>
         <item>com.mitv.gallery</item>
+        <item>io.github.fyting.videoshelf</item>
     </string-array>
 
     <!-- The TV's Live TV / tuner app, offered at the end of the Inputs menu. Leave empty to omit. -->
@@ -236,7 +239,7 @@
     <!-- A direct Launcher settings action instead of TV Settings in the header (or top_menu).
          Off by default; a theme can set "launcher_settings_button": true. -->
     <bool name="launcher_settings_button">false</bool>
-    <!-- A round Launcher settings button (a house) beside TV Settings, for owners who change the launcher often;
+    <!-- A round Launcher settings button (three sliders) beside TV Settings, for owners who change the launcher often;
          the Settings button's hold-OK menu then leaves out its own Launcher settings row. false (the default for
          every other TV) keeps launcher settings in that menu only. This TV sets it. -->
     <bool name="launcher_settings_icon">true</bool>

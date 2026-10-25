@@ -19,9 +19,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +47,8 @@ final class Config {
     static final String DOCK_OPACITY_KEY = "dock_opacity";
     static final String WALLPAPER_ROTATION_KEY = "wallpaper_rotation_minutes";
     static final String WALLPAPER_DIM_KEY = "wallpaper_dim";
+    /** The video rows switched on in Launcher settings, one name per line in screen order; "" when all are off. */
+    static final String HOME_VIDEOS_ROWS_KEY = "home_videos_rows";
     /**
      * Counts the changes made in Launcher settings. Home remembers the count it was built with and rebuilds on
      * resume when it differs, however the settings were left (see MainActivity#onResume).
@@ -54,6 +58,43 @@ final class Config {
     /** True when Launcher settings changed something since Home was built at revision {@code seen}. */
     static boolean settingsChanged(long seen, long current) {
         return seen != current;
+    }
+
+    /**
+     * The video rows Home shows, top to bottom (home_videos_authority): config.xml's home_videos_rows, unless rows were
+     * switched on or off in Launcher settings. Null when every row is off there, so Home leaves the provider alone.
+     */
+    static List<String> homeVideosRows(Context ctx) {
+        return homeVideosRows(Arrays.asList(ctx.getResources().getStringArray(R.array.home_videos_rows)),
+                ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE).getString(HOME_VIDEOS_ROWS_KEY, null));
+    }
+
+    static List<String> homeVideosRows(List<String> configured, String chosen) {
+        if (chosen == null) return configured;
+        List<String> rows = new ArrayList<>();
+        for (String name : chosen.split("\n")) {
+            if (!name.trim().isEmpty()) rows.add(name.trim());
+        }
+        return rows.isEmpty() ? null : rows;
+    }
+
+    /**
+     * The rows Launcher settings offers to switch: those the provider has now in its order (or, before it answers or
+     * when it cannot, the configured ones), then any switched on that it lacks at the moment, so they can be turned off.
+     */
+    static List<String> videoRowChoices(List<String> offered, List<String> configured, Collection<String> on) {
+        Set<String> names = new LinkedHashSet<>(offered.isEmpty() ? configured : offered);
+        names.addAll(on);
+        return new ArrayList<>(names);
+    }
+
+    /** The HOME_VIDEOS_ROWS_KEY value: the switched-on rows in the order Launcher settings lists them. */
+    static String videoRowsChoice(List<String> names, Collection<String> on) {
+        List<String> picked = new ArrayList<>();
+        for (String name : names) {
+            if (on.contains(name)) picked.add(name);
+        }
+        return String.join("\n", picked);
     }
     private static final String THEME_REVISION_NAME = "theme_revision";
     private static final String THEME_SIGNATURE_KEY = "theme_signature";
@@ -573,12 +614,13 @@ final class Config {
             SharedPreferences.Editor editor = choices.edit();
             if (!"absent".equals(token)) editor.remove("columns").remove("animations")
                     .remove("advanced_effects").remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY)
-                    .remove(DOCK_OPACITY_KEY).remove(WALLPAPER_ROTATION_KEY).remove(WALLPAPER_DIM_KEY);
+                    .remove(DOCK_OPACITY_KEY).remove(WALLPAPER_ROTATION_KEY).remove(WALLPAPER_DIM_KEY)
+                    .remove(HOME_VIDEOS_ROWS_KEY);
             editor.putString(THEME_SIGNATURE_KEY, signature).commit();
         } else if (!seen.equals(signature)) {
             choices.edit().remove("columns").remove("animations").remove("advanced_effects")
                     .remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY).remove(DOCK_OPACITY_KEY)
-                    .remove(WALLPAPER_ROTATION_KEY).remove(WALLPAPER_DIM_KEY)
+                    .remove(WALLPAPER_ROTATION_KEY).remove(WALLPAPER_DIM_KEY).remove(HOME_VIDEOS_ROWS_KEY)
                     .putString(THEME_SIGNATURE_KEY, signature).commit();
         }
     }

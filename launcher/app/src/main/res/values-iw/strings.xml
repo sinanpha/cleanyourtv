@@ -118,6 +118,8 @@
     <string name="wallpaper_theme_default">ברירת המחדל של ערכת הנושא</string>
     <string name="wallpaper_rotation_label">החלפת הטפט כל (דקות)</string>
     <string name="wallpaper_dim_label">הכהיית הטפט</string>
+    <string name="home_videos_label">שורות וידאו במסך הבית</string>
+    <string name="home_videos_hint">אפשר להפעיל או לכבות כל שורה. כשכל השורות כבויות, מסך הבית מפסיק לקרוא אותן.</string>
     <string name="wallpaper_screensaver_picture">תמונת שומר מסך %1$d</string>
 
     <!-- Race-weekend panel (RaceWeekend). -->

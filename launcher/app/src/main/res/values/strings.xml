@@ -56,6 +56,8 @@
     <string name="wallpaper_theme_default">Theme default</string>
     <string name="wallpaper_rotation_label">Change the wallpaper every (minutes)</string>
     <string name="wallpaper_dim_label">Darken the wallpaper</string>
+    <string name="home_videos_label">Video rows on Home</string>
+    <string name="home_videos_hint">Turn each row on or off. With every row off, Home stops reading them.</string>
     <string name="wallpaper_screensaver_picture">Screensaver picture %1$d</string>
     <string name="animations_state">Animations: %1$s</string>
     <string name="advanced_effects">Advanced effects</string>

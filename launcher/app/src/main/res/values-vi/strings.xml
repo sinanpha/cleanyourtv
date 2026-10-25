@@ -85,6 +85,8 @@
     <string name="wallpaper_theme_default">Theo theme</string>
     <string name="wallpaper_rotation_label">Đổi hình nền sau (phút)</string>
     <string name="wallpaper_dim_label">Làm tối hình nền</string>
+    <string name="home_videos_label">Hàng video trên Home</string>
+    <string name="home_videos_hint">Bật hoặc tắt từng hàng. Tắt hết thì Home không đọc nữa.</string>
     <string name="wallpaper_screensaver_picture">Ảnh màn hình chờ %1$d</string>
     <string name="reorder">Sắp xếp ứng dụng</string>
     <string name="reorder_hint">Bấm OK để nhấc ứng dụng, phím mũi tên để di chuyển, Back để đặt xuống. Bấm Back lần nữa để xong.</string>

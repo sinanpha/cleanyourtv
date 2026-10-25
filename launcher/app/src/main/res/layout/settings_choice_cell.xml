@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One choice in a row of them whose number the code decides: Launcher settings' video rows. -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/SettingsColumnChoice"
+    android:ellipsize="end"
+    android:maxLines="1" />

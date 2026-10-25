@@ -553,6 +553,8 @@ and a wallpaper.
   - **Change the wallpaper every (minutes)** 5, 15, 30 or 60, which rotates the pictures in `wallpapers/`
     and drops a single picture picked above; **Darken the wallpaper** 0%, 20%, 40% or 60%, for a bright photo
     under white text.
+  - **Video rows on Home**, only with `home_videos_authority`: each row the provider has (History,
+    Subscriptions and Recommended from Video Shelf) on or off. With every row off, Home stops reading the provider.
   - **Animations** on or off, and **Advanced effects** (tile lift, icon zoom and smooth ambient-colour
     transitions; they may use more memory) once animations are on.
   - **Follow theme (reset on-TV choices)**, which clears every choice above. Pushing or resetting a theme

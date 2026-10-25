@@ -361,7 +361,7 @@
                     style="@style/TopButtonIcon"
                     android:visibility="gone"
                     android:contentDescription="@string/launcher_settings"
-                    android:drawableStart="@drawable/ic_home_settings_pill"
+                    android:drawableStart="@drawable/ic_launcher_settings"
                     android:nextFocusDown="@+id/grid" />
 
                 <TextView

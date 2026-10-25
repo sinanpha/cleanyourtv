@@ -52,6 +52,7 @@ import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -606,7 +607,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         launcherSettingsButton = cfg.launcherSettingsButton;
         if (launcherSettingsButton) {
             ((TextView) btnSettings).setText(R.string.launcher_settings);
-            ((TextView) btnSettings).setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_home_settings_pill, 0, 0, 0);
+            ((TextView) btnSettings).setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_launcher_settings, 0, 0, 0);
         }
         btnSettings.setOnClickListener(v -> {
             if (launcherSettingsButton) startActivityForResult(
@@ -700,9 +701,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         btnLibraryTop.setOnKeyListener(pillKeys);
         btnLauncherTop.setOnKeyListener(pillKeys);
         String videoAuthority = getString(R.string.home_videos_authority);
-        if (!videoAuthority.isEmpty()) {
-            homeVideos = new HomeVideos(this, root, hero, videoAuthority,
-                    getResources().getStringArray(R.array.home_videos_rows), getResources().getInteger(R.integer.home_videos_per_row),
+        // Every row switched off in Launcher settings: no rows and no reads, as with an empty authority.
+        List<String> videoRows = Config.homeVideosRows(this);
+        if (!videoAuthority.isEmpty() && videoRows != null) {
+            homeVideos = new HomeVideos(this, root, hero, (View) findViewById(R.id.leftBlock).getParent(), videoAuthority,
+                    videoRows.toArray(new String[0]), getResources().getInteger(R.integer.home_videos_per_row),
                     getResources().getInteger(R.integer.home_videos_max));
         }
         String weatherAuthority = getString(R.string.weather_authority).trim();
@@ -841,6 +844,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onResume() {
         super.onResume();
+        stayOpaque();
+        handler.removeCallbacks(stayOpaqueLater);
+        handler.postDelayed(stayOpaqueLater, 1000);
         // A festival that started or ended while Home was in the background: rebuild with or without it.
         if (festive != festival.active(LocalDate.now())) {
             recreate();
@@ -1056,6 +1062,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     protected void onPause() {
         super.onPause();
         root.removeCallbacks(showIdleClock);
+        handler.removeCallbacks(stayOpaqueLater);
         endReorder();   // Home or another app while reordering keeps the order so far
         wallpaperPlayer.stop();
         stopAmbientAnimation();
@@ -1065,6 +1072,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         handler.removeCallbacks(minuteTick);
         stopStats();
         if (diya != null) diya.stop();
+        if (homeVideos != null) homeVideos.pause();
         cancelPendingFocusScroll();
         // Nothing of ours stays on screen over another app; an undecided prompt simply returns next time.
         if (cardPrompt != null) cardPrompt.dismiss();
@@ -1106,10 +1114,27 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         tileRefresh.invalidate();
     }
 
+    /**
+     * Home is opaque (Theme.TvHome), yet on a MiTV-MOOR2 it was twice left marked as not covering the apps behind it
+     * (ActivityRecord mOccludesParent=false) after an app switch, so Android kept the app that had been in front
+     * visible. Home's task always sits at the lowest layer, so that app covered Home entirely while Home was the
+     * resumed, focused activity: the screen stayed on TV Settings, or on Monster TV, after Home or Back. Telling
+     * Android again that Home is opaque (Android 11's setTranslucent(false), which changes nothing when it already
+     * knows) hides them. Checked on resume, on focus and a second later, since the flag can change during the switch.
+     */
+    private void stayOpaque() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && setTranslucent(false)) {
+            Log.w("TvHome", "Home was marked translucent after an app switch; marked opaque again");
+        }
+    }
+
+    private final Runnable stayOpaqueLater = this::stayOpaque;
+
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
+            stayOpaque();
             startPendingSettingsReorder();
             if (libraryFocusPending && appLibrary == null) focusLibrary();
             showCardPrompt();
@@ -3030,7 +3055,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
         addInputRow(rows, popup, R.drawable.ic_swap_vert, getString(R.string.reorder), -1, this::toggleReorder);
         if (launcherSettingsButton) {
-            addInputRow(rows, popup, R.drawable.ic_home_settings_pill, getString(R.string.launcher_settings), -1,
+            addInputRow(rows, popup, R.drawable.ic_launcher_settings, getString(R.string.launcher_settings), -1,
                     () -> startActivityForResult(new Intent(this, LauncherSettingsActivity.class), LAUNCHER_SETTINGS_REQUEST));
         } else {
             addInputRow(rows, popup, R.drawable.ic_settings, getString(R.string.settings), -1,
