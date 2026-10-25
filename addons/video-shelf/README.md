@@ -17,7 +17,10 @@ The same rows can sit on the home screen, above the dock: `ShelfProvider`
 (`content://io.github.fyting.videoshelf.shelf/videos`) lists the videos with picture URIs that open JPEGs this
 app downloads into its cache (at most 120 files), up to `home_row_limit` (24) videos a row, while this app's own
 screen keeps `row_limit` (12); a launcher build with `home_videos_authority` set to that
-authority reads them. The launcher itself needs no network permission that way. The provider answers only the
+authority reads them. The launcher itself needs no network permission that way. `.../rows` lists just the row
+names (History, Subscriptions and Recommended first, as `row_order` puts them, without asking SmartTube for
+anything), so Launcher settings can offer each row to switch on or off; with every row off Home stops reading the
+provider. The card and tile can be hidden with the launcher's `hidden_apps` while the provider keeps serving. The provider answers only the
 packages in `shelf_readers` (`com.gathin.tvhome`); any other caller, the shell included, gets a SecurityException,
 since the rows include the watch history.
 
@@ -29,6 +32,14 @@ the launcher asks, which it does while Home is on screen, at most once every 30 
 three hours is not served. Empty coordinates serve no weather and send nothing.
 
 SmartTube has to publish its channels: turn them on in SmartTube's settings if the screen says there are none.
+
+SmartTube writes those channels again only every 15 minutes, the shortest period Android's WorkManager allows, so
+a video watched a minute ago could take up to 15 minutes to reach History. When this screen opens or the launcher
+reads the rows, Video Shelf asks SmartTube to write them now, through the receiver SmartTube keeps for the boot
+broadcasts (`source_refresh` in options.xml, sent `QUICKBOOT_POWERON`). That takes about 6 s, and the reader reads
+again 12 s later, keeping the focus on the same card. At most once every `source_refresh_gap_seconds` (120), since
+each ask starts SmartTube if it is not running and rewrites about a hundred rows. Empty `source_refresh` never
+asks.
 
 ## Permissions
 

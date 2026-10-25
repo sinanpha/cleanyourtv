@@ -30,6 +30,16 @@
     <!-- Videos per row handed to the launcher's rows (ShelfProvider), which scroll sideways and cap them again with
          home_videos_max. Only the cards Home builds are drawn, so this can be larger than row_limit. -->
     <integer name="home_row_limit">24</integer>
+    <!-- Receivers asked to write their rows again when Home or this screen reads them (SourceRefresh), as
+         package/class. SmartTube rewrites its rows only every 15 minutes, so a video just watched reached History up to
+         15 minutes late; its UpdateChannelsReceiver rewrites them in about 6 s, and the reader reads again 12 s later.
+         Empty never asks. -->
+    <string-array name="source_refresh" translatable="false">
+        <item>org.smarttube.stable/com.liskovsoft.leanbackassistant.channels.UpdateChannelsReceiver</item>
+        <item>org.smarttube.beta/com.liskovsoft.leanbackassistant.channels.UpdateChannelsReceiver</item>
+    </string-array>
+    <!-- At most one ask in this many seconds: each starts SmartTube if it is not running and rewrites ~100 rows. -->
+    <integer name="source_refresh_gap_seconds">120</integer>
     <!-- The place whose weather ShelfProvider serves to the launcher's header (content://…shelf/weather, read with
          weather_authority), in decimal degrees: Hanoi. Sent to Open-Meteo at two decimals (about 1 km); empty serves
          no weather and sends nothing. -->

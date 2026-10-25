@@ -1,6 +1,7 @@
 package io.github.fyting.videoshelf;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -106,6 +107,26 @@ public class ShelfTest {
         assertEquals(Shelf.signature(a), Shelf.signature(same));
         assertNotEquals(Shelf.signature(a), Shelf.signature(other));
         assertTrue(Shelf.signature(Collections.emptyList()).isEmpty());
+    }
+
+    @Test
+    public void signatureIgnoresProgramIds() {
+        // SmartTube writes its rows again every 15 minutes with new program ids for the same videos.
+        List<Shelf.Channel> channels = Collections.singletonList(new Shelf.Channel(3, TUBE, "History"));
+        Shelf.Item before = new Shelf.Item(417486, 3, TUBE, "x", "https://i.ytimg.com/vi/a/hq.jpg", "intent:a", 29, true);
+        Shelf.Item after = new Shelf.Item(417624, 3, TUBE, "x", "https://i.ytimg.com/vi/a/hq.jpg", "intent:a", 29, true);
+        assertEquals(
+                Shelf.signature(Shelf.build(channels, Collections.singletonList(before), Collections.emptyList(),
+                        "Continue", SOURCES, 10)),
+                Shelf.signature(Shelf.build(channels, Collections.singletonList(after), Collections.emptyList(),
+                        "Continue", SOURCES, 10)));
+    }
+
+    @Test
+    public void asksAgainOnlyAfterTheGap() {
+        assertTrue(SourceRefresh.due(SourceRefresh.NEVER, 5_000, 120_000));
+        assertFalse(SourceRefresh.due(10_000, 129_999, 120_000));
+        assertTrue(SourceRefresh.due(10_000, 130_000, 120_000));
     }
 
     private static Shelf.Row row(String name) {

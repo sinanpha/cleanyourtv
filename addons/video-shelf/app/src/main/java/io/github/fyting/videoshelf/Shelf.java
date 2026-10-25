@@ -123,12 +123,17 @@ final class Shelf {
         return ordered;
     }
 
-    /** Changes whenever what the shelf would show changes, so an unchanged refresh keeps the focus where it is. */
+    /**
+     * Changes whenever what the shelf would show changes, so an unchanged refresh keeps the focus where it is. Not the
+     * program ids: SmartTube writes every row again with new ones each time, the same videos included.
+     */
     static String signature(List<Row> rows) {
         StringBuilder sb = new StringBuilder();
         for (Row r : rows) {
             sb.append(r.channelId).append(':').append(r.name).append('[');
-            for (Item it : r.items) sb.append(it.id).append(',').append(it.title).append(',').append(it.poster).append(';');
+            for (Item it : r.items) {
+                sb.append(it.title).append(',').append(it.poster).append(',').append(it.intentUri).append(';');
+            }
             sb.append(']');
         }
         return sb.toString();

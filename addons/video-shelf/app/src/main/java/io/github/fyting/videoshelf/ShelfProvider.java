@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 
 import java.io.File;
@@ -17,12 +18,16 @@ import java.util.Set;
 /**
  * Hands the shelf's rows to the home screen, so a launcher without network access can show them:
  * {@code content://io.github.fyting.videoshelf.shelf/videos} lists every video (row name, title, picture, intent,
- * package), and each picture URI opens a JPEG this app downloaded into its cache. Only the packages in
- * {@code R.array.shelf_readers} (the launcher) may read either; the rows include the owner's watch history.
+ * package), {@code .../rows} just the row names (for the launcher's settings), and each picture URI opens a JPEG
+ * this app downloaded into its cache. Only the packages in {@code R.array.shelf_readers} (the launcher) may read
+ * any of them; the rows include the owner's watch history.
+ * When the read has just asked the source apps to write their rows again (SourceRefresh), the cursor's extras hold
+ * {@link #REREAD_MS}: read again after that many milliseconds for the fresh rows.
  */
 public class ShelfProvider extends ContentProvider {
 
     static final String[] COLUMNS = {"_id", "row_name", "title", "image", "intent", "package"};
+    static final String REREAD_MS = "reread_ms";
 
     @Override
     public boolean onCreate() {
@@ -33,10 +38,11 @@ public class ShelfProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         checkReader();
         if ("weather".equals(uri.getLastPathSegment())) return weather();
+        if ("rows".equals(uri.getLastPathSegment())) return rowNames();
         if (!"videos".equals(uri.getLastPathSegment())) return null;
-        Set<String> sources = new LinkedHashSet<>(Arrays.asList(
-                getContext().getResources().getStringArray(R.array.source_packages)));
+        Set<String> sources = sources();
         int limit = getContext().getResources().getInteger(R.integer.home_row_limit);
+        long reread = SourceRefresh.ask(getContext());
         List<Shelf.Row> rows = TvListings.load(getContext().getContentResolver(), sources,
                 getContext().getString(R.string.continue_watching), limit);
         MatrixCursor out = new MatrixCursor(COLUMNS);
@@ -48,7 +54,29 @@ public class ShelfProvider extends ContentProvider {
                 out.addRow(new Object[]{it.id, row.name, it.title, image, it.intentUri, row.pkg});
             }
         }
+        if (reread > 0) {
+            Bundle extras = new Bundle();
+            extras.putLong(REREAD_MS, reread);
+            out.setExtras(extras);
+        }
         return out;
+    }
+
+    /**
+     * {@code rows}: the names of the rows there are now, in this app's row_order (History, Subscriptions, Recommended
+     * first), for the launcher's settings to switch on or off. Asks the source apps for nothing.
+     */
+    private Cursor rowNames() {
+        List<Shelf.Row> rows = Shelf.order(TvListings.load(getContext().getContentResolver(), sources(),
+                getContext().getString(R.string.continue_watching), 1),
+                Arrays.asList(getContext().getResources().getStringArray(R.array.row_order)));
+        MatrixCursor out = new MatrixCursor(new String[]{"row_name"});
+        for (Shelf.Row row : rows) out.addRow(new Object[]{row.name});
+        return out;
+    }
+
+    private Set<String> sources() {
+        return new LinkedHashSet<>(Arrays.asList(getContext().getResources().getStringArray(R.array.source_packages)));
     }
 
     /** {@code weather}: one row, the weather now at options.xml's place (Weather), or none while it is unknown. */

@@ -59,6 +59,8 @@ public class ShelfActivity extends Activity {
     }, "listings"));
     /** Coalesces the thumbnail check while a row scrolls: once the scroll settles, not on every frame of it. */
     private final Runnable loadVisibleTask = this::loadVisible;
+    /** The second read after asking the source apps for fresh rows (SourceRefresh). */
+    private final Runnable rereadTask = () -> refresh(false);
     private final List<HorizontalScrollView> rowScrolls = new ArrayList<>();
 
     private Thumbnails thumbs;
@@ -74,6 +76,7 @@ public class ShelfActivity extends Activity {
     private Set<String> sources;
     private String shown = "";
     private int generation;
+    private boolean resumed;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -140,12 +143,21 @@ public class ShelfActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        refresh();
+        resumed = true;
+        refresh(true);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        resumed = false;
+        main.removeCallbacks(rereadTask);   // onResume reads again anyway
     }
 
     @Override
     protected void onDestroy() {
         main.removeCallbacks(loadVisibleTask);
+        main.removeCallbacks(rereadTask);
         io.shutdownNow();
         thumbs.shutdown();
         super.onDestroy();
@@ -166,14 +178,16 @@ public class ShelfActivity extends Activity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
         super.onRequestPermissionsResult(requestCode, permissions, results);
-        if (requestCode == REQUEST_ACCESS) refresh();
+        if (requestCode == REQUEST_ACCESS) refresh(false);
     }
 
-    private void refresh() {
+    /** Reads the rows; with askSources, also asks the source apps for fresh ones and reads again once they wrote them. */
+    private void refresh(boolean askSources) {
         final int gen = ++generation;
         final String watchNextName = getString(R.string.continue_watching);
         final int limit = getResources().getInteger(R.integer.row_limit);
         io.execute(() -> {
+            long reread = askSources ? SourceRefresh.ask(this) : 0;
             List<Shelf.Row> rows;
             try {
                 rows = Shelf.order(TvListings.load(getContentResolver(), sources, watchNextName, limit), rowOrder);
@@ -186,7 +200,9 @@ public class ShelfActivity extends Activity {
             Log.i(TAG, rows.size() + " rows, " + videos + " videos");
             final List<Shelf.Row> result = rows;
             main.post(() -> {
-                if (gen == generation && !isDestroyed()) show(result);
+                if (gen != generation || isDestroyed()) return;
+                show(result);
+                if (reread > 0 && resumed) main.postDelayed(rereadTask, reread);
             });
         });
     }
@@ -209,6 +225,17 @@ public class ShelfActivity extends Activity {
         if (signature.equals(shown)) return;   // nothing new: keep the focus and the scroll where they are
         shown = signature;
 
+        // New rows while the owner is in them (the second read after SourceRefresh): the focus stays at the same row
+        // and card, not back on the first card.
+        int focusRow = -1, focusCard = 0;
+        View focused = getCurrentFocus();
+        for (int i = 0; focused != null && i < rowScrolls.size(); i++) {
+            ViewGroup line = (ViewGroup) rowScrolls.get(i).getChildAt(0);
+            if (focused.getParent() == line) {
+                focusRow = i;
+                focusCard = line.indexOfChild(focused);
+            }
+        }
         rowsBox.removeAllViews();
         rowScrolls.clear();
         View first = null;
@@ -235,6 +262,10 @@ public class ShelfActivity extends Activity {
             hsv.addView(line);
             rowsBox.addView(hsv);
             rowScrolls.add(hsv);
+        }
+        if (focusRow >= 0 && !rowScrolls.isEmpty()) {
+            ViewGroup line = (ViewGroup) rowScrolls.get(Math.min(focusRow, rowScrolls.size() - 1)).getChildAt(0);
+            if (line.getChildCount() > 0) first = line.getChildAt(Math.min(focusCard, line.getChildCount() - 1));
         }
         if (first != null) first.requestFocus();
         scroll.post(this::loadVisible);
