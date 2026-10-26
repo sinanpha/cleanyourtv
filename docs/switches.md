@@ -37,3 +37,4 @@ the rules. Keys from before this rule are on its wanted list; a screenshot for o
 | `home_videos_per_row` | <img src="switches/home_videos_authority.jpg" width="320" alt="home_videos_per_row on a TV: six videos per row, thumbnails blurred"> |
 | `home_videos_max` | <img src="switches/home_videos_authority.jpg" width="320" alt="home_videos_max on a TV: rows of videos above the dock that scroll past the screen, thumbnails blurred"> |
 | `weather_authority` | <img src="switches/weather_authority.jpg" width="320" alt="weather_authority on a TV: a sun behind a cloud and 31° after the date in the header, video rows blurred"> |
+| `lunar_date` | <img src="switches/lunar_date.jpg" width="320" alt="lunar_date on a TV: 17/9 ÂM LỊCH after the date in the header, video rows blurred"> |

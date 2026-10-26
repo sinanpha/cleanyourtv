@@ -33,6 +33,8 @@
     <string name="shamsi_month_dey">די</string>
     <string name="shamsi_month_bahman">בהמן</string>
     <string name="shamsi_month_esfand">אספנד</string>
+    <string name="lunar_date">%1$d/%2$d בלוח הירחי</string>
+    <string name="lunar_date_leap">%1$d/%2$d מעובר, בלוח הירחי</string>
     <string name="stats_cpu">מעבד %1$d%%</string>
     <string name="stats_memory">זיכרון %1$d / %2$d MB</string>
     <string name="stats_storage">אחסון %1$s פנוי</string>

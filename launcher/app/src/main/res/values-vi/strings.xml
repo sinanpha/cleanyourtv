@@ -21,6 +21,9 @@
     <string name="cant_open">Không mở được %1$s</string>
     <!-- "Thứ Hai, 20 tháng 10" -->
     <string name="date_format">EEEE, d MMMM</string>
+    <!-- "17/9 âm lịch" -->
+    <string name="lunar_date">%1$d/%2$d âm lịch</string>
+    <string name="lunar_date_leap">%1$d/%2$d nhuận, âm lịch</string>
     <string name="dream_name">Đồng hồ</string>
     <string name="vpn">VPN</string>
     <string name="vpn_off">VPN tắt</string>

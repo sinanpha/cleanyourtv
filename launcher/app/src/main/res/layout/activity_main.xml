@@ -277,6 +277,20 @@
                                 android:letterSpacing="0.14"
                                 android:textAllCaps="true" />
 
+                            <!-- Vietnamese lunar date ("17/9 âm lịch"), shown when lunar_date is on. -->
+                            <TextView
+                                android:id="@+id/lunarDate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="22dp"
+                                android:singleLine="true"
+                                android:textColor="#A6FFFFFF"
+                                android:textSize="14sp"
+                                android:fontFamily="@string/font_regular"
+                                android:letterSpacing="0.14"
+                                android:textAllCaps="true"
+                                android:visibility="gone" />
+
                             <TextView
                                 android:id="@+id/weather"
                                 android:layout_width="wrap_content"

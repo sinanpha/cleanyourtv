@@ -183,6 +183,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** The pills have been filled in once; later resumes refresh them after the first frame. */
     private boolean pillsShown;
     private TextView shamsiDate;
+    private TextView lunarDate;
     private TextView stats;
     private List<RaceWeekend.Race> raceCalendar;
     private View racePanel;
@@ -190,6 +191,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** config.xml show_stats, overridable by a theme. Off: the line is gone and nothing is read. */
     private boolean showStats;
     private boolean shamsi;
+    private boolean lunar;
     /** greeting_name: said after the greeting, which is shown in capitals. */
     private String greetingName = "";
     /** Optional time-of-day backdrop (config.xml, sky_intensity); 0 keeps it hidden. */
@@ -441,6 +443,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
         btnWifi = findViewById(R.id.btnWifi);
         shamsiDate = findViewById(R.id.shamsiDate);
+        lunarDate = findViewById(R.id.lunarDate);
         stats = findViewById(R.id.stats);
         raceCalendar = cfg.raceCalendar;
         racePanel = findViewById(R.id.racePanel);
@@ -455,7 +458,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             TextView date = findViewById(R.id.date);
             date.setTextSize(11f);
             date.setPadding(0, (int) (4 * density), 0, 0);
+            lunarDate.setTextSize(11f);
+            lunarDate.setPadding(0, (int) (4 * density), 0, 0);
         }
+        lunar = cfg.lunarDate;
+        if (lunar) lunarDate.setVisibility(View.VISIBLE);
         vpnApp = cfg.vpnApp;
         moduleCards = cfg.moduleCards;
         hiddenApps = new HashSet<>(cfg.hiddenApps);
@@ -2401,6 +2408,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             greeting.setTextColor(greetingColor);
         }
         if (shamsi) shamsiDate.setText(Shamsi.today(getResources()));
+        if (lunar) lunarDate.setText(Lunar.today(getResources()));
     }
 
     // ---- race-weekend panel (a theme's race_calendar) -----------------------------------------------

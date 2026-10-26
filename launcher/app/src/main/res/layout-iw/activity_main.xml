@@ -221,6 +221,20 @@
                             android:letterSpacing="0.08"
                             android:visibility="gone" />
 
+                        <!-- Vietnamese lunar date, shown when lunar_date is on (to the date's left, read right to left). -->
+                        <TextView
+                            android:id="@+id/lunarDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="22dp"
+                            android:singleLine="true"
+                            android:textColor="#A6FFFFFF"
+                            android:textSize="14sp"
+                            android:fontFamily="@string/font_regular"
+                            android:letterSpacing="0.14"
+                            android:textAllCaps="true"
+                            android:visibility="gone" />
+
                         <TextClock
                             android:id="@+id/date"
                             android:gravity="right"

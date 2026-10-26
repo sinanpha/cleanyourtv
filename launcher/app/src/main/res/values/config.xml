@@ -223,6 +223,11 @@
          Gregorian date. -->
     <bool name="shamsi_date">false</bool>
 
+    <!-- Show the Vietnamese lunar date (âm lịch) after the date, e.g. "17/9 ÂM LỊCH", "nhuận" in a leap month.
+         Reckoned at UTC+7 as Vietnamese calendars are. A theme can set it too. `false` is the default; this
+         TV's build turns it on. -->
+    <bool name="lunar_date">true</bool>
+
     <!-- A name after the greeting: "Mr. Trịnh" shows GOOD MORNING, MR. TRỊNH. Empty: the greeting alone. -->
     <string name="greeting_name" translatable="false"></string>
     <!-- Optional VPN app the network pill opens (hold the pill for Wi-Fi settings), e.g. the package of the

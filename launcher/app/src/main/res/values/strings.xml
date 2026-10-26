@@ -35,6 +35,9 @@
     <string name="shamsi_month_dey">Dey</string>
     <string name="shamsi_month_bahman">Bahman</string>
     <string name="shamsi_month_esfand">Esfand</string>
+    <!-- Vietnamese lunar date after the date (lunar_date): day/month. -->
+    <string name="lunar_date">%1$d/%2$d lunar</string>
+    <string name="lunar_date_leap">%1$d/%2$d leap, lunar</string>
     <string name="stats_cpu">CPU %1$d%%</string>
     <string name="stats_memory">Memory %1$d / %2$d MB</string>
     <string name="stats_storage">Storage %1$s free</string>
